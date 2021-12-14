@@ -54,7 +54,7 @@ int main(int argc,char *argv[])
   lab=kv+kl+ku+1;
   
   AB = (double *) malloc(sizeof(double)*lab*la);
-  set_GB_operator_colMajor_poisson1D(AB, &lab, &la, &kv);
+  set_GB_operator_colMajor_poisson1D(AB, lab, la, kv);
   
   /* uncomment the following to check matrix A */
   // write_GB_operator_colMajor_poisson1D(AB, &lab, &la, "AB.dat");
