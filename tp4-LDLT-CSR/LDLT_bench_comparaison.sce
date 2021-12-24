@@ -1,6 +1,6 @@
 function [] = LDLT_bench_comparaison(matrix_size_range, runs)
-    filename1 = "LDLT3b.dat";
-    filename2 = "LDLT1b.dat";
+    filename1 = "data/LDLT3b.dat";
+    filename2 = "data/LDLT1b.dat";
     [f1, mode_f1] = mopen(filename1, "w");
     [f2, mode_f2] = mopen(filename2, "w");
     

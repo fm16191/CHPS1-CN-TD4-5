@@ -3,7 +3,7 @@ set size ratio 0.8
 set key right bottom Right samplen 2 spacing .8 height 3 font ",10"
 set logscale y
 set xtics scale default 0,25
-set output "LDLT_bench.svg"
+set output "data/LDLT_bench.svg"
 set xlabel "Matrix size"
 set ylabel offset 2 "Average execution time"
 set title font "Helvetica Bold, 10" #offset -5
@@ -20,16 +20,16 @@ set logscale y2
 set y2label offset -2 "Average speedup" 
 
 set title "Difference of execution time in logarithmic scale according to the size of the matrix"
-plot "LDLT3b.dat" using 1:2 ls 1 title "myLDLT3b" with lines, "LDLT3b.dat" using 1:2:4:3 ls 3 notitle with errorbars,\
-"LDLT1b.dat" using 1:2 ls 2 title "myLDLT1b" with lines, "LDLT1b.dat" using 1:2:4:3 ls 3 title "dispersion" with errorbars,\
-"< paste LDLT3b.dat LDLT1b.dat" using 1:($2/$9) smooth bezier ls 4 title "average speedup" with lines axis x1y2
+plot "data/LDLT3b.dat" using 1:2 ls 1 title "myLDLT3b" with lines, "data/LDLT3b.dat" using 1:2:4:3 ls 3 notitle with errorbars,\
+"data/LDLT1b.dat" using 1:2 ls 2 title "myLDLT1b" with lines, "data/LDLT1b.dat" using 1:2:4:3 ls 3 title "dispersion" with errorbars,\
+"< paste data/LDLT3b.dat data/LDLT1b.dat" using 1:($2/$9) smooth bezier ls 4 title "average speedup" with lines axis x1y2
 
 #set key right center Right
 set ytics mirror
 unset y2tics
 unset y2label
 set title "Difference of precision in logarithmic scale according to the size of the matrix"
-set output "LDLT_bench_precision.svg"
+set output "data/LDLT_bench_precision.svg"
 set ylabel "Average precision"
-plot "LDLT3b.dat" using 1:5 ls 4 title "myLDLT3b" with lines, "LDLT3b.dat" using 1:5:7:6 ls 3 notitle with errorbars,\
-"LDLT1b.dat" using 1:5 ls 5 title "myLDLT1b" with lines, "LDLT1b.dat" using 1:5:7:6 ls 3 title "dispersion" with errorbars
+plot "data/LDLT3b.dat" using 1:5 ls 4 title "myLDLT3b" with lines, "data/LDLT3b.dat" using 1:5:7:6 ls 3 notitle with errorbars,\
+"data/LDLT1b.dat" using 1:5 ls 5 title "myLDLT1b" with lines, "data/LDLT1b.dat" using 1:5:7:6 ls 3 title "dispersion" with errorbars
