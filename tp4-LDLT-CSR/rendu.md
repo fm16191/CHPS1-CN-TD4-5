@@ -33,13 +33,43 @@ Lien vers le dépôt git du suivi de vos codes.
 # Exercice 1 - Factorisation LDL^T pour A symétrique
 > On cherche à résoudre l'équation `A*x=b`. Pour ceci, on va simplifier par la résolution de deux systèmes triangulaires `L*y = B` et `U*x = y`. 
 
-Dans le cas d'une matrice symétrique, la décomposition A = L\*U correspond à la factorisation de Cholesky A = L*L' où la matrice triangulaire supérieure U est la transposée de L (L').
-Dans la décomposition de Cholesky alternative A = L\*D*L', D correspond à la diagonale de la matrice A.
+Dans le cas d'une matrice symétrique, la décomposition A = L\*U correspond à la factorisation de Cholesky A = L\*L' où la matrice triangulaire supérieure U est la transposée de L (L').
+Dans la décomposition de Cholesky alternative A = L\*D\*L', D correspond à la diagonale de la matrice A.
 
-// TODO
+> Existence et unicité de la factorisation `A = L*U` [¹](#annexes)
 
-Existence et unicité de la factorisation `A = L*U`
 
+On cherche à montrer que la matrice A possède une décomposition LU.
+
+On suppose que toutes les sous-matrices de A sont inversibles.
+
+Avec A une matrice de taille n = 1 : 
+
+A = (a) avec a != 0 car a inversible
+
+une décomposition A = LU existe, avec L = (1) et U = (a).
+
+On cherche à montrer par récurrence que A, matrice inversible de taille n+1 possède une décomposotion LU.
+
+On suppose que la sous matrice An est inversible, et que la propriété est vraie au rang n (`An = Ln * Un`).
+
+Une décomposition LU de An+1 est alors An+1 = Ln+1 * Un+1, avec :
+
+# TODO : écrire le paragraphe en propre.
+
+> Unicité de la décomposition LU
+
+Supposons que A ait les décompositions `A = L1\*U1` et `A = L2*U2`.
+
+`L1\*U1 = L2*U2`
+
+On multiplie l'équation par `L2^-1 * U1^-1`
+
+<=> `L2^-1 * L1 * U1^-1 * U1 = L2 * L2^-1 * U2 * U1^-1`
+
+<=> `L2^-1 * L1 * I = I * U2 * U1^-1`
+
+L2^-1 et L1 sont des matrices triangulaires inférieures, U2 et U1^-1 sont des matrices triangulaires supérieures, impliquant que la seule solution de ce système est `L2^-1 * L1 = U2 * U1^-1 = I`, impliquant que `L1 = L2` et `U1 = U2`.
 
 
 Première implémentation, **décomposition naïve de Cholesky** :
@@ -144,7 +174,7 @@ On priviliégera alors la seconde fonction `myLDLT1b` pour la suite, pour de gra
 
 
 
-
-
 # Annexes
-[Github Repository](https://github.com/fm16191/-CHPS1-CN-TD4-5)
+1. [Décomposition LU et Choleski par Jean-Michel Ferrard @www.klubprepa.net](http://klubprepa.fr/Site/Document/ChargementDocument.aspx?IdDocument=5624) page 14 : Quelques démonstrations.
+
+2. [Github Repository](https://github.com/fm16191/-CHPS1-CN-TD4-5)
