@@ -150,11 +150,11 @@ gnuplot LDLT_bench_comparaison.p
 
 Un rapide test de performance, en utilisant la méthode décrite précédemment, indique une nette amélioration du temps d'exécution de la seconde fonction. Sur de grosses matrices, de tailles supérieures à 80, l'utilisation de la seconde fonction réduit le temps d'exécution d'environ 30 fois.
 
-![LDLT_bench](data/LDLT_bench.svg)
+![LDLT_bench](tp4-LDLT-CSR/data/LDLT_bench.svg)
 - Figure 1 : Différence du temps d'exécution en échelle logarithmique en fonction de la taille de la matrice
 
 
-![LDLT_bench](data/LDLT_bench_precision.svg)
+![LDLT_bench](tp4-LDLT-CSR/data/LDLT_bench_precision.svg)
 - Figure 2 : Différence de précision en échelle logarithmique en fonction de la taille de la matrice.
 
 Si la seconde fonction est bien plus rapide que la première, l'erreur commise `norm(L*D*L' - A)` augmente également, d'un facteur moyen d'ordre de grandeur 10
@@ -299,13 +299,13 @@ On trace les résultats avec gnuplot.
 
 On obtient les graphes suivants : 
 
-![CSR_bench](data/CSR_bench.svg)
+![CSR_bench](tp4-LDLT-CSR/data/CSR_bench.svg)
 - Figure 3 : Différence du temps d'exécution en échelle logarithmique des fonctions `mCSRv`, `csmtCSR` et calcul référence fonction de la taille de ka dimension n de la matrice d'entrée.
 
-![CSR_bench_precision](data/CSR_bench_precision.svg)
+![CSR_bench_precision](tp4-LDLT-CSR/data/CSR_bench_precision.svg)
 - Figure 4 : Différence de précision en fonction de la taille de la dimension n de la matrice d'entrée
 
-![CSR_bench_density](data/CSR_bench_density.svg)
+![CSR_bench_density](tp4-LDLT-CSR/data/CSR_bench_density.svg)
 - Figure 5 : Différence du temps d'exécution en échelle logarithmique des fonctions `mCSRv`, `csmtCSR` et calcul référence fonction de la densitée de la matrice creuse d'entrée.
 
 Note : *La courbe différence du temps d'exécution porte sur la différence entre le temps d'exécution de `mCSRv` et ed la fonction référence basique de scilab.
