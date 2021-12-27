@@ -1,78 +1,68 @@
-Rapport 2 - Feuille TD/TP 4 et 5 [dû au 27 Décembre 23h59 au plus tard]
+# **Rendu Calcul Numérique TP 4 et 5 :** *Exploitation des structures des matrices & Application à l'équation de la chaleur 1D stationnaire*
 
-[Moodle](https://moodle.uvsq.fr/moodle2022/mod/assign/view.php?id=36193)
+# TP4 : Exercice 1 - Factorisation $LDL^T$ pour $A$ symétrique
+> On cherche à résoudre l'équation $A*x=b$. Pour ceci, on va simplifier par la résolution de deux systèmes triangulaires $L*y = B$ et $U*x = y$. 
 
+Dans le cas d'une matrice symétrique, la décomposition $A = L*U$ correspond à la factorisation de Cholesky $A = L*L'$ où la matrice triangulaire supérieure U est la transposée de L (L').
 
-Rapport au format .pdf < 2M.O 
-Lien vers le dépôt git du suivi de vos codes.
+Dans la décomposition de Cholesky alternative $A = L*D*L'$, D correspond à la diagonale de la matrice A.
 
-    Contenu relatif au TD/TP 4 
-        Exercice 1
-            Implémenter l'algorithme de la factorisation LDL^T pour une matrice symétrique
-            Tester et valider votre algorithme
-            Mesurer les performances et comparer à la complexité théorique
-            Comparer à LU
-        Exercice 5 
-            Implémenter un produit matrice vecteur creux pour le format CSR
-            Tester et valider votre algorithme
-    Contenu relatif au TD/TP 5 (à la date du 9 Décembre)
-        Travail préliminaire et explication du cas test Poisson 1D
-        Explication du code, de son architecture, des appels aux bibliothèques externes
-        Explication du format de stockage et illustration des stockages en Row Major et Col Major
-        Explication et validation des appels à dgbsv
-
-    Contenu relatif au TD/TP 5 (à la date du 14 Décembre)
-        Explication et validation des appels à dgbmv (en priorité ColMajor et mise en place des tests : si ça ne marche pas expliquer le résultat des tests)
-        Implémentation du LU pour matrice tridiagonal (au format GB en C)
-        Exercice Jacobi et Richardson avec implémentation Scilab
-        (compte rendu des scéances TD avec M. El Arar et du TP avec M. Dufaud)
+## Existence et unicité de la factorisation $A = L*U$
 
 
-
-
-# Exercice 1 - Factorisation LDL^T pour A symétrique
-> On cherche à résoudre l'équation `A*x=b`. Pour ceci, on va simplifier par la résolution de deux systèmes triangulaires `L*y = B` et `U*x = y`. 
-
-Dans le cas d'une matrice symétrique, la décomposition A = L\*U correspond à la factorisation de Cholesky A = L\*L' où la matrice triangulaire supérieure U est la transposée de L (L').
-Dans la décomposition de Cholesky alternative A = L\*D\*L', D correspond à la diagonale de la matrice A.
-
-> Existence et unicité de la factorisation `A = L*U` [¹](#references)
-
-
-On cherche à montrer que la matrice A possède une décomposition LU.
+> On cherche à montrer que la matrice A possède une décomposition LU.
 
 On suppose que toutes les sous-matrices de A sont inversibles.
 
-Avec A une matrice de taille n = 1 : 
+Avec A une matrice de taille $n = 1$, on a alors $A = (a)$ avec $a != 0$ car a inversible. 
+Une décomposition $A = LU$ existe alors, avec $L = (1)$ et $U = (a)$.
 
-A = (a) avec a != 0 car a inversible
+On peut prouver par récurrence que $A$, matrice inversible de taille n+1 possède une décomposotion $LU$, en supposant que la sous matrice An est inversible, et que la propriété est vraie au rang n ($An = Ln * Un$)
 
-une décomposition A = LU existe, avec L = (1) et U = (a).
+On aurais alors une décomposition $LU$ de $An+1$ est alors $An+1 = Ln+1 * Un+1$, avec :
 
-On cherche à montrer par récurrence que A, matrice inversible de taille n+1 possède une décomposotion LU.
+$Ln+1 = \begin{pmatrix}Ln & 0\\ Rn & 1 \end{pmatrix}\ \ et\ \ \ Un+1 = \begin{pmatrix}Un & Cn\\ 0 & \lambda n \end{pmatrix}$ avec $Rn$ un vecteur ligne, $Cn$ un vecteur colonne et $\lambda n$ un scalaire.
 
-On suppose que la sous matrice An est inversible, et que la propriété est vraie au rang n (`An = Ln * Un`).
+En posant la matrice $An+1$ on aurais alors $\begin{pmatrix}An & An'\\ An'' & An''' \end{pmatrix} = \begin{pmatrix}Ln & 0\\ Rn & 1 \end{pmatrix} \begin{pmatrix}Un & Cn\\ 0 & \lambda n \end{pmatrix}$
 
-Une décomposition LU de An+1 est alors An+1 = Ln+1 * Un+1, avec :
+Il ne nous reste alors plus qu'à faire cette multiplication de matrices, d'où on obtiens les équations suivantes : 
+- $An = Ln * Un$ (on retrouve ici notre hypothèse)
+- $An' = Ln * Cn \Leftrightarrow Cn = Ln^{-1} * An'$
+- $An'' = Rn*Cn \Leftrightarrow Rn = Un^{-1} * An''$
+- $An''' = Rn*Cn + \lambda n \Leftrightarrow \lambda n = An''' - Rn*Cn \Leftrightarrow An''' - (Un^{-1}*An'')(Ln^{-1}*An')$
 
-# TODO : écrire le paragraphe en propre.
+Si la décomposition LU existe pour $An+1$ à partir de $An$, alors pour une $A$ matrice inversible, dont les mineures sont inversibles, $A$ possède une décomposition $LU$.
 
-> Unicité de la décomposition LU
+\- *d'après [¹](#references)*
 
-Supposons que A ait les décompositions `A = L1\*U1` et `A = L2*U2`.
+> On cherche à prouver que si $A$ possède une décomposition $LU$, alors celle-ci est unique
 
-`L1\*U1 = L2*U2`
+Supposons que A ait les décompositions $A = L1*U1$ et $A = L2*U2$.
 
-On multiplie l'équation par `L2^-1 * U1^-1`
+Par définition, $L1*U1 = L2*U2$. On multiplie l'équation par $L2^-1 * U1^-1$
 
-<=> `L2^-1 * L1 * U1^-1 * U1 = L2 * L2^-1 * U2 * U1^-1`
+- $L1*U1 = L2*U2$
+- $\Leftrightarrow L2^{-1} * L1 * U1^{-1} * U1 = L2 * L2^{-1} * U2 * U1^{-1}$
+- $\Leftrightarrow L2^{-1} * L1 * I = I * U2 * U1^{-1}$
 
-<=> `L2^-1 * L1 * I = I * U2 * U1^-1`
+Puisque $L2^{-1}$ et $L1$ sont des matrices triangulaires inférieures, $U2$ et $U1^{-1}$ sont des matrices triangulaires supérieures, ce système ne possède qu'une seule solution : $L2^{-1} * L1 = U2 * U1^{-1} = I$, impliquant que $L1 = L2$ et $U1 = U2$.
 
-L2^-1 et L1 sont des matrices triangulaires inférieures, U2 et U1^-1 sont des matrices triangulaires supérieures, impliquant que la seule solution de ce système est `L2^-1 * L1 = U2 * U1^-1 = I`, impliquant que `L1 = L2` et `U1 = U2`.
+\- *d'après [²](#references)*
+
+> On cherche alors à montrer que si $A$ est symétrique, alors il existe une factorisation $A = LDL^T$.
+
+Si possède une factorisation $LU$, alors on peut écrire $A$ sous la forme $A = LD^{-1}V$, où $DV = U$, avec $V$ une matrice triangulaire supérieure avec diagonale unitaire.
+
+$A$ étant symétrique, on peut écrire $A = LDV \Leftrightarrow A = V^TDL^T = A^T$.
+
+Puisque $A = LU$ ne possède qu'une seule solution, on trouve alors $L = V^T$, $V$ étant alors la matrice triangulaire inférieure à diagonale unitaire et $DL^T$ la matrice triangulaire supérieure. L'unicité de $A = LDL^T$ découle de l'unicité de $A=LU$.
+
+\- *d'après [³](#references)*
+
+## On va désormais implémenter un algorithme sur Scilab pour une factorisation $LDL^T$
 
 
-Première implémentation, **décomposition naïve de Cholesky** :
+> Première implémentation, **décomposition naïve de Cholesky** :
 ```scilab
 function [L, D] = myLDLT3b(A)
     n = size(A, "r");
@@ -103,7 +93,7 @@ function [L, D] = myLDLT3b(A)
 endfunction
 ```
 
-Cet algorithme a une complexité approximée en `O(n³)`, du fait de ses trois imbrications de boucles.
+Cet algorithme a une complexité approximée en $O(n³)$, du fait de ses trois imbrications de boucles.
 
 Vérification des résultats.
 
@@ -121,9 +111,9 @@ A = x*x'
 norm(A - L*D*L')
 ```
 
-Seconde implémentation, **adaptation de la décomposition LU** :
+> Seconde implémentation, par **adaptation de la décomposition LU** :
 
-En prenant compte que dans le cas d'une matrice symétrique, `U = L'`, on peut adapter la fonction optimisée en une seule boucle faite au TP précédent, `mylu1b`, et l'ajuster pour obtenir L et D.
+En prenant compte que dans le cas d'une matrice symétrique, $U = L'$, on peut adapter la fonction optimisée en une seule boucle faite au TP précédent, `mylu1b`, et l'ajuster pour obtenir $L$ et $D$.
 
 L reste alors identique, on n'a plus besoin de U, et on implémente D.
 
@@ -144,16 +134,16 @@ function [L, D] = myLDLT1b(A)
 endfunction
 ```
 
-Cet algorithme est de complexité `n-1`, du fait de son unique boucle. Les boucles inline ne sont pas compté dans la complexité.
+Cet algorithme est de complexité $O(n-1)$, du fait de son unique boucle. Les boucles inline ne sont pas comptées dans la complexité.
 
 ## Comparaison des deux fonctions.
 
-(scilab) Exécution des fonctions sur tailles de matrices de 5 à 50 avec un pas de 5 puis de 60 à 250 avec un pas de 10.
+(*scilab*) Exécution des fonctions sur tailles de matrices de 5 à 50 avec un pas de 5 puis de 60 à 250 avec un pas de 10.
 5 Itérations pour chaque taille de matrice.
 ```scilab
 LDLT_bench_comparaison([linspace(1,50,10), linspace(60,250,20)], 5)
 ```
-(shell) Représentation graphique
+(*shell*) Représentation graphique
 ```shell
 gnuplot LDLT_bench_comparaison.p
 ```
@@ -169,19 +159,19 @@ Un rapide test de performance, en utilisant la méthode décrite précédemment,
 
 Si la seconde fonction est bien plus rapide que la première, l'erreur commise `norm(L*D*L' - A)` augmente également, d'un facteur moyen d'ordre de grandeur 10
 
-Dans les deux cas, la précision moyenne reste au moins d'ordre `e^-12` pour chaque exécution, ce qui reste acceptable. 
+Dans les deux cas, la précision moyenne reste au moins d'ordre $e^{-12}$ pour chaque exécution, ce qui reste acceptable. 
 
 On priviliégera alors la seconde fonction `myLDLT1b` pour la suite, pour de grandes matrices.
 
 
-# Exercice 5 - Produit Matrice Vecteur Creux
+# TP4 : Exercice 5 - Produit Matrice Vecteur Creux
 
 > Dans cet exercice, on cherche à écrire un algorithme permettant de calculer le produit d'une matrice creuse A de m lignes et n colonnes avec un vecteur de longueur n
 
-Dans le format CSR, une matrice creuse A de taille m lignes * n colonnes est stockée sous forme de trois vecteurs [²](#references) :
+Dans le format CSR, une matrice creuse A de taille m lignes * n colonnes est stockée sous forme de trois vecteurs [⁴](#references) :
 - AX : vecteur contenant les coefficients non nuls de A, ligne par ligne. Contient nz éléments non nuls de A.
-- AJ : vecteur de taille nz contenant les indices colonnes de chaque coefficient du vecteur AX. Pour tout k de 1 à nz, AJ(k) correspond à l'indice colonne de AX(k).
-- AI : vecteur de taille m+1 contenant les indices dans AX de chaque début (et donc aussi de fin) de ligne. Pour chaque ligne k, les éléments non nuls de A(k,:) sont placés dans AX de l'indice AI(k) à AI(k+1)
+- AJ : vecteur de taille nz contenant les indices colonnes de chaque coefficient du vecteur AX. Pour tout k de 1 à $nz$, $AJ(k)$ correspond à l'indice colonne de $AX(k)$.
+- AI : vecteur de taille m+1 contenant les indices dans AX de chaque début (et donc aussi de fin) de ligne. Pour chaque ligne k, les éléments non nuls de $A(k,:)$ sont placés dans AX de l'indice $AI(k)$ à $AI(k+1)$
 
 Pour ce faire, nous allons utiliser deux fonctions, `csmtCSR` et `mCSRv`.
 
@@ -209,7 +199,7 @@ function [AX, AI, AJ] = csmtCSR(A)
 endfunction
 ```
 
-Cet algorithme est de complexité `m*n`, du fait de ses deux boucles.
+Cet algorithme est de complexité $O(m*n)$, du fait de ses deux boucles.
 
 Le second algorithme, `mCSRv` (Multiplication CSR vector) effecture, comme son nom l'indique, une multiplication de matrice stockée sous format SCR par un vecteur.
 - En entrée : `AX, AI, AJ`, les matrices stockages CSR, et `v`, le vecteur multiplicateur
@@ -341,62 +331,64 @@ Une première tentative d'optimisation a été par l'utilisation de la fonction 
 > Bien que le stockage CSR coûte en temps de d'exécution sur scilab, il est important de noter que le stockage CSR réduit dans l'algorithme considérablement le nombre d'opérations.
 
 > Rappels des complexités des algorithmes :
-- `m*n*n` pour le calcul naïf en matrice stockage plein (référence)
-- `nz` pour `mCSRv`
-- `nz` pour `csmtCSR`
+- $m*n*n$ pour le calcul naïf en matrice stockage plein (référence)
+- $nz$ pour `mCSRv`
+- $nz$ pour `csmtCSR`
 
-avec `nz` est le nombre d'éléments non nuls de la matrice. Dans le pire des cas, `nz = m*n`.
+avec $nz$ est le nombre d'éléments non nuls de la matrice. Dans le pire des cas, $nz = m*n$.
 
 > Différence de stockage mémoire pour une matrice de taille m*n : 
-- `m*n` pour un stockage matrice pleine
-- `2*nz + n+1` pour un stockage CSR (*)
+- $m*n$ pour un stockage matrice pleine
+- $2*nz + n+1$ pour un stockage CSR (*)
 
-*\* pour le stockage CSR, les matrices AJ et AX sont de tailles `nz` et AI est de taille `n+1`*
+*\* pour le stockage CSR, les matrices AJ et AX sont de tailles $nz$ et AI est de taille n+1*
 
-Pour que le stockage en CSR soit rentable, d'un point de vue mémoire occupée, il faut que `2*nz + n+1 < m*n`.
+Pour que le stockage en CSR soit rentable, d'un point de vue mémoire occupée, il faut que $2*nz + n+1 < m*n$.
 
 En pratique, pour une matrice creuse de taille `m*n` et de densité `d`, on a `nz = d * m*n` : 
-- `2*nz + n+1 < m*n` <=> `2(d*m*n) + n+1 < m*n`
-- `2*nz + n+1 < m*n` <=> `n+1 < m*n(1-2*d)`
-- `2*nz + n+1 < m*n` <=> `1 + 1/n < m*(1-2*d)`
-- `2*nz + n+1 < m*n` <=> `(1 + 1/n)/m < 1-2*d`
-- `2*nz + n+1 < m*n` <=> `1/m + 1/mn < 1-2*d`
-- `2*nz + n+1 < m*n` <=> `1/m + 1/mn -1 < -2*d`
-- `2*nz + n+1 < m*n` <=> `1 - 1/m - 1/mn > 2*d`
-- `2*nz + n+1 < m*n` <=> `0.5 - 1/2m - 1/2mn > d`
+- $2*nz + n+1 < m*n  \Leftrightarrow 2(d*m*n) + n+1 < m*n$
+- $2*nz + n+1 < m*n  \Leftrightarrow n+1 < m*n(1-2*d)$
+- $2*nz + n+1 < m*n  \Leftrightarrow 1 + 1/n < m*(1-2*d)$
+- $2*nz + n+1 < m*n  \Leftrightarrow (1 + 1/n)/m < 1-2*d$
+- $2*nz + n+1 < m*n  \Leftrightarrow 1/m + 1/mn < 1-2*d$
+- $2*nz + n+1 < m*n  \Leftrightarrow 1/m + 1/mn -1 < -2*d$
+- $2*nz + n+1 < m*n  \Leftrightarrow 1 - 1/m - 1/mn > 2*d$
+- $2*nz + n+1 < m*n  \Leftrightarrow 0.5 - 1/2m - 1/2mn > d$
 
 Pour des grandes matrices, `1/2m et 1/2mn` tendent vers 0.
 
 > On peut alors considérer que pour que le stockage CSR soit rentable d'un point de vue mémoire, il faut que d soit borné par 0.5
 
 > Différence d'opérations pour une matrice de taille m*n par vecteur de taille n:
-- `m*(n*n)` multiplications + `m*((n-1)*n)` additions pour un stockage matrice pleine
-- `nz` multiplications + `nz` additions (*)
+- $m(n²)$ multiplications + $m((n-1)n)$ additions pour un stockage matrice pleine
+- $nz$ multiplications + $nz$ additions (*)
 
 *\*On ne considère ici qu'uniquement la différence d'algorithmes de multiplications, à savoir `mCSRv`.*
 
-Pour que le stockage CSR soit rentable d'un point de vue opérations, il faut que `2*nz < m*(n*n) + m*((n-1)*n)`
-- `2*nz < m*(n*n) + m*((n-1)*n)` <=> `2*d*m*n < m*n² + m*n² - mn`
-- `2*nz < m*(n*n) + m*((n-1)*n)` <=> `(2*d+1)*m*n < 2m*n²`
-- `2*nz < m*(n*n) + m*((n-1)*n)` <=> `2*d+1 < 2n`
-- `2*nz < m*(n*n) + m*((n-1)*n)` <=> `2*d < 2n -1`
-- `2*nz < m*(n*n) + m*((n-1)*n)` <=> `d < n - 0.5`
+Pour que le stockage CSR soit rentable d'un point de vue opérations, il faut que $2*nz < m*(n*n) + m*((n-1)*n)$
+- $2*nz < m*(n*n) + m*((n-1)*n) \Leftrightarrow 2*d*m*n < m*n² + m*n² - mn$
+- $2*nz < m*(n*n) + m*((n-1)*n) \Leftrightarrow (2*d+1)*m*n < 2m*n²$
+- $2*nz < m*(n*n) + m*((n-1)*n) \Leftrightarrow 2*d+1 < 2n$
+- $2*nz < m*(n*n) + m*((n-1)*n) \Leftrightarrow 2*d < 2n -1$
+- $2*nz < m*(n*n) + m*((n-1)*n) \Leftrightarrow d < n - 0.5$
 
-Si on considère `n = 1`, on a `d < 0.5` condition déjà recommandé pour rentabiliser le stockage CSR d'un point de vue mémoire.
+Si on considère `n = 1`, on a `d < 0.5` condition déjà recommandée pour rentabiliser le stockage CSR d'un point de vue mémoire.
 
 Par ailleurs, d est par définition borné entre 0 et 1. Si n > 1, alors le stockage CSR est forcément rentable d'un point de vue nombre d'opérations à effectuer.
 
 Nb : ici ne sont pas prises en compte les accès mémoires, plus coûteux que les opérations. CSR demandera moins d'accès mémoires qu'en matrice pleine, du fait de son stockage en vecteurs.
 
 > L'utilisation du stockage CSR pour des matrices creuses est toujours plus optimisé que le stockage matrice pleine, d'un point de vue du nombre d'opérations à effectuer.
-> 
-> Bien ce que ceci ne se reflète pas sur scilab, le temps d'exécution devrait toujours être plus court en stockage CSR. Cela est sans doute dû à la façon dont scilab effectue son opérations "référence" de multiplication matrice pleine par vecteur, qui est très probablement optimisée dans scilab, plutôt que notre algorithme, qui doit lui d'abord est interprété.
+
+> Bien ce que ceci ne se reflète pas sur scilab, le temps d'exécution devrait toujours être plus court en stockage CSR. Cela est très probablement dû à l'utilisation interne de fonctions déjà optimisées, contairement à notre algorithme, qui doit lui être interprété.
 
 
 
 # References
 1. [Décomposition LU et Choleski par Jean-Michel Ferrard @www.klubprepa.net](http://klubprepa.fr/Site/Document/ChargementDocument.aspx?IdDocument=5624) page 14 : Quelques démonstrations.
-2. [Analyse Numérique 2014-2015](https://math.unice.fr/~massonr/ANL3/20142015/TP5.pdf) Rappels format CSR.
+2. Cours Calcul Numérique par T. Dufaud
+3. [Analyse Numérique Elémentaire @utc.fr](https://moodle.utc.fr/pluginfile.php/24405/mod_resource/content/15/MT09-ch2_ecran.pdf) page 51-52 : Factorisation $LDL^T$
+4. [Analyse Numérique 2014-2015](https://math.unice.fr/~massonr/ANL3/20142015/TP5.pdf) Rappels format CSR.
 
 
 # Annexes
