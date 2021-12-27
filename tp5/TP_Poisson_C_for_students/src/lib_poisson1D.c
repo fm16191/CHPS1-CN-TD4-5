@@ -9,17 +9,19 @@
 void set_GB_operator_rowMajor_poisson1D(double* AB, int lab, int la) {
   // TODO
   // Faire les variables kv, lab, la plutôt que des pointeurs (?)
-  printf("lab : %d _ la : %d\n", lab, la);
+  // printf("lab : %d _ la : %d\n", lab, la);
   int kv = lab - 3;
   int ii, jj, kk;
+  // Si l'index dans la matrice différent de 0, on a kv colonnes à initialiser à 0.
   for (jj = 0; jj < kv; jj++) {
-    // Si l'index dans la matrice différent de 0, on a kv colonnes à initialiser à 0.
-    for (ii = 0;ii < la; ii++) { // Pour chaque ligne index < kv, on initialise à 0
+    // Pour chaque ligne index < kv, on initialise à 0
+    for (ii = 0;ii < la; ii++) {
       AB[kv * lab + ii] = 0.0;
     }
   }
 
-  for (ii = 0; ii < la; ii++) { // Pour chaque ligne index < kv, on initialise à 0
+  // Pour chaque ligne index < kv, on initialise à 0
+  for (ii = 0; ii < la; ii++) {
     AB[(kv)*la + ii] = -1.0;
     AB[(kv + 1) * la + ii] = 2.0;
     AB[(kv + 2) * la + ii] = -1;
@@ -36,7 +38,7 @@ void set_GB_operator_rowMajor_poisson1D(double* AB, int lab, int la) {
 // Initialisation de la matrice
 void set_GB_operator_colMajor_poisson1D(double* AB, int lab, int la, int kv) {
   // Faire les variables kv, lab, la plutôt que des pointeurs (?)
-  printf("lab : %d _ la : %d\n", lab, la);
+  // printf("lab : %d _ la : %d\n", lab, la);
   int ii, jj, kk;
   for (jj = 0;jj < (la);jj++) {
     kk = jj * (lab);
@@ -58,9 +60,9 @@ void set_GB_operator_colMajor_poisson1D(double* AB, int lab, int la, int kv) {
 
   AB[(lab) * (la)-1] = 0.0;
 
-  for (jj = 0;jj < (la);jj++) {
-    printf("=> %lf, %lf, %lf, %lf\n", AB[jj * lab], AB[jj * lab + 1], AB[jj * lab + 2], AB[jj * lab + 3]);
-  }
+  // for (jj = 0;jj < (la);jj++) {
+  //   printf("=> %lf, %lf, %lf, %lf\n", AB[jj * lab], AB[jj * lab + 1], AB[jj * lab + 2], AB[jj * lab + 3]);
+  // }
 }
 
 

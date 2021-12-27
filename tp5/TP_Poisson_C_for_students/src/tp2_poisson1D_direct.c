@@ -16,11 +16,13 @@ int main(int argc,char *argv[]){
   double T0, T1;
   double *RHS, *EX_SOL, *X;
   double *AB;
+  double *y;
 
   double temp, relres;
 
 // KV ? - ne marche pas si pas de KV à 1
 // indice dans la doc de lapack
+// lignes temporaires nécessaires pour dgbtrf
 // lié à dgbtrf
 // KL, KU dans la doc
 
@@ -35,7 +37,7 @@ int main(int argc,char *argv[]){
 
   NRHS=1;
   nbpoints=102;
-  la = nbpoints - 2; // la : taille de matrice
+  la=nbpoints-2; // la : taille de matrice
   T0=-5.0;
   T1=5.0;
 
@@ -45,6 +47,12 @@ int main(int argc,char *argv[]){
   RHS=(double *) malloc(sizeof(double)*la);
   EX_SOL=(double *) malloc(sizeof(double)*la);
   X=(double *) malloc(sizeof(double)*la);
+  
+  // FOR TESTS PURPOSES ONLY
+  y=(double *) malloc(sizeof(double)*la);
+  for (int i = 0 ; i < la; i++) y[i] = 1;
+  // y=(double *) malloc(sizeof(double)*3);
+  // for (int i = 0 ; i < 3; i++) y[i] = i+1;
 
   // Vecteur linéaire uniforme de ]0 à 1[
   set_grid_points_1D(X, &la);
@@ -74,22 +82,68 @@ int main(int argc,char *argv[]){
   /* working array for pivot used by LU Factorization */
   ipiv = (int *) calloc(la, sizeof(int));
 
-  int row = 1; // choix de la méthode de Lapack
+  int row = 0; // choix de la méthode de Lapack
 
-  if (row == 1){ // LAPACK_ROW_MAJOR
+  if (row == 0){ // LAPACK_ROW_MAJOR
+    printf("LAPACK_ROW_MAJOR\n");
+    printf("lab : %d _ la : %d\n", lab, la);
+
     set_GB_operator_rowMajor_poisson1D(AB, lab, la);
     write_GB_operator_rowMajor_poisson1D(AB, lab, la, "AB_row.dat");
 
     info = LAPACKE_dgbsv(LAPACK_ROW_MAJOR,la, kl, ku, NRHS, AB, la, ipiv, RHS, NRHS);
+
+
+    set_GB_operator_rowMajor_poisson1D(AB, 3, la);
+    write_vec(y, &la, "dgbmv_y_row_b.dat");
+    // cblas_dgbmv(CblasRowMajor, CblasNoTrans, M, N, kl, ku, alpha, A, lda, X, incX, beta, Y, incY);
+    cblas_dgbmv(CblasRowMajor, CblasNoTrans, la, la, kl, ku, 2, AB, la, y, 1, 1, y, 1);
+    write_vec(y, &la, "dgbmv_y_row_a.dat");
   } 
   
   else { // LAPACK_COL_MAJOR
-    printf("COL MAJOR\n");
-    set_GB_operator_colMajor_poisson1D(AB, lab, la, kv);
+    printf("LAPACK_COL_MAJOR\n");
+    set_GB_operator_colMajor_poisson1D(AB, 3, la, 0);
     write_GB_operator_colMajor_poisson1D(AB, lab, la, "AB_col.dat");
     // write_GB_operator_rowMajor_poisson1D(AB, &lab, &la, "AB_row.dat");
 
-    info = LAPACKE_dgbsv(LAPACK_COL_MAJOR,la, kl, ku, NRHS, AB, lab, ipiv, RHS, la);
+    // https://www.netlib.org/lapack/explore-html/de/ddd/lapacke_8h_a84fd8b92816876c9c6c20608a1362aa5.html
+    // Ax = B
+    // B : RHS
+    // LDAB : leading dimension of AB
+    // Ipiv : pivot de dimensions N
+    // The pivot indices that define the permutation matrix P;
+    // row i of the matrix was interchanged with row IPIV(i).
+
+    // la : leading dimension of RHS
+    // info = LAPACKE_dgbsv(LAPACK_COL_MAJOR, N, kl, ku, NRHS, AB, LDAB, ipiv, B, ldb);
+    info = LAPACKE_dgbsv(LAPACK_COL_MAJOR, la, kl, ku, NRHS, AB, lab, ipiv, RHS, la);
+
+
+    printf("lab : %d _ la : %d\n", lab, la);
+
+    // m = la = 100
+    // n = lab = 3 <- LEADING DIMENSION (LDA)
+    // Since we are in col major, 
+    
+    set_GB_operator_colMajor_poisson1D(AB, 3, la, 0);
+    write_GB_operator_colMajor_poisson1D(AB, 3, la, "dgbmv_AB_col.dat");
+    // cblas_dgbmv(CBLAS_LAYOUT layout,
+    // CBLAS_TRANSPOSE TransA, const CBLAS_INDEX M, const CBLAS_INDEX N,
+    // const CBLAS_INDEX KL, const CBLAS_INDEX KU, const double alpha,
+    // const double* A, const CBLAS_INDEX lda, const double* X,
+    // const CBLAS_INDEX incX, const double beta, double* Y, const CBLAS_INDEX incY);
+    // cblas_dgbmv(CblasColMajor, CblasNoTrans, M, N, kl, ku, alpha, A, lda, X, incX, beta, Y, incY);
+
+    printf("kl : %d _ ku : %d\n", kl, ku);
+
+    write_vec(y, &la, "dgbmv_y_col_b.dat");
+    cblas_dgbmv(CblasColMajor, CblasNoTrans, la, la, kl, ku, 1, AB, la, y, 1, 1, y, 1);
+    write_vec(y, &la, "dgbmv_y_col_a.dat");
+    // cblas_dgbmv(CblasRowMajor,
+    // Computes alpha*A*x + beta*y or alpha*A'*x + beta*y depending on the value of TransA.
+    
+    // Fonctionne en colMajor, ||b - A*x||
   }    
 
   
