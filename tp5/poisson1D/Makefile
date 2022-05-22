@@ -77,4 +77,4 @@ run_tp2poisson1D_direct:
 	bin/tp2poisson1D_direct
 
 clean:
-	rm *.o bin/*
+	rm -f *.o bin/*
